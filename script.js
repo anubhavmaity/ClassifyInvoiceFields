@@ -102,7 +102,7 @@ var arr = [{'data':'Mr Amod Jha, XXX, YYT, New Delhi', 'position': '3A'}, {'data
 {'data': 'External brand prints as per the agreed designs and specifications	', 'position':'15BC'}, {'data': '1', 'position':'15D'}, 
 {'data': '₹ 200.00', 'position':'15E'}, {'data': '₹ 200.00', 'position':'15F'},
 {'data': '3', 'position':'16A'}, {'data': 'Floor Directory as per the agreed designs and specifications	', 'position':'16BC'}, 
-{'data': '2', 'position':'16D'}, {'data': '₹ 300.00', 'position':'16E'}, {'data': '₹ 600.00', 'position':'16F'}
+{'data': '2', 'position':'16D'}, {'data': '₹ 300.00', 'position':'16E'}, {'data': '₹ 600.00', 'position':'16F'},
 {'data': '4', 'position': '17A'}, {'data': 'Design/ Agency  Charges', 'position':'17BC'}, {'data': '₹ 10.00', 'position':'17F'},
 {'data': '5', 'position': '18A'}, {'data': 'Packaging, Loading, Unloading, Installation Charges', 'position':'18BC'}, 
 {'data': '₹ 20.00', 'position':'18F'}, {'data': '₹ 1,030.00', 'position': '22F'}, {'data': '₹ 23,540.00', 'position': '23F'},
@@ -155,5 +155,33 @@ var classifyFields = function(arr) {
 	console.log(output_arr);
 }
 
-classifyFields(arr);
+var arrangeByRow = function(arr) {
+	var output_arr = [];
+	var row_no = parseInt(arr[0]['position']);
+	count = 0;
+	var fields_dict = {};
+	fields_dict[count] = [];
+	for (var i=0; i<arr.length; i++) {
+		
+		
+		var current_row_no = parseInt(arr[i]['position']);
+		//console.log(current_row_no);
+		if (current_row_no === row_no) {
+			fields_dict[count].push(arr[i]['data']);
+		}
+		else {
+			row_no = current_row_no;
+			//console.log(row_no);
+			count = count + 1;
+			fields_dict[count] = [];
+			fields_dict[count].push(arr[i]['data']);
+
+		}
+
+	}
+	console.log(fields_dict);
+}
+
+arrangeByRow(arr);
+
 
