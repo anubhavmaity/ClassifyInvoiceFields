@@ -1,8 +1,8 @@
-var checkForFloat = function(numeric) {
+var checkForFloat = function(n) {
 	var numeric = parseInt(numeric);
 	return n === Number(n) && n % 1 !== 0;
 }
-var checkForInt = function(numeric) {
+var checkForInt = function(n) {
 	var numeric = parseInt(numeric);
 	return Number(n) === n && n % 1 === 0;
 }
@@ -29,7 +29,7 @@ var checkForProdQuant = function(prod_quant) {
 
 var checkForPrices = function(prod_prices) {
 	//check for currency also
-	var re = /^-?\d*(\.\d+)?$/;
+	var re = /(?:Rs.|[₹]|Rs)?\s{1}\d+(?:\.\d+)?/;
 	return re.test(prod_prices);
 }
 
@@ -43,6 +43,13 @@ var checkForInvoiceNo = function(invoice_no) {
 
 }
 
+var getValueFromPrice = function(price) {
+	//remove the currency symbols if there any 
+	var rx = /\d+(?:\.\d+)?/;
+  	var rx_arr = price.match(rx);
+  	var value = parseInt(rx_arr[0]); 
+  	return value
+}
 var findUnitPriceUnitQuanity = function() {
 	//will require postion
 	//other than that getting difficult to get the data, it is taking lot of time to multiply everything
@@ -109,6 +116,7 @@ var arr = [{'data':'Mr Amod Jha, XXX, YYT, New Delhi', 'position': '3A'}, {'data
 {'data': '-₹ 2,817.50', 'position': '24F'}, {'data': '₹ 3.71', 'position': '25F'}, {'data': '₹ 28,000.00', 'position': '26F'},
 {'data': '₹ 2,676.21', 'position': '27F'}]
 
+/*
 var classifyFields = function(arr) {
 	var output_arr = [];
 	for (var i = 0; i< arr.length; i++) {
@@ -154,7 +162,42 @@ var classifyFields = function(arr) {
 	}
 	console.log(output_arr);
 }
+*/
 
+// var classifyFields = function(element) {
+// 	if (checkForDate(arr[i])) {
+// 			//console.log(arr[i] + " is date");
+			
+// 			fields_dict["category"].push("date");
+// 	}
+// 	else if (checkForAddress(arr[i]) && checkForPlaceInAddr(arr[i])) {
+// 			//console.log("hi");
+// 			//console.log(checkForAddress(arr[i]));
+// 			//console.log(checkForP,laceInAddr(arr[i]));
+// 			fields_dict["category"].push("address");
+// 	}
+// 	else if (checkForCustomerName(arr[i])) {
+// 			//console.log(arr[i] + " is Customer Name");
+// 			fields_dict["category"].push("Customer name");
+// 	}
+		
+// 		if (checkForProdQuant(arr[i])) {
+
+// 			fields_dict["category"].push("product quantity");
+// 		}
+// 		if (checkForPrices(arr[i]) || checkForCurrencySymbol(arr[i])) {
+// 			//console.log(checkForCurrencySymbol(arr[i]));
+// 			//console.log(arr[i] + " is price");
+// 			fields_dict["category"].push("prices");
+// 		}
+// 		if (checkForProductName(arr[i])) {
+// 			//console.log(arr[i] + " product name");
+// 			fields_dict["category"].push("product name");
+// 		}
+// 		if (checkForMobileNo(arr[i])) {
+// 			fields_dict["category"].push("mobile no");
+// 		}
+// }
 var arrangeByRow = function(arr) {
 	var output_arr = [];
 	var row_no = parseInt(arr[0]['position']);
@@ -179,9 +222,59 @@ var arrangeByRow = function(arr) {
 		}
 
 	}
-	console.log(fields_dict);
+	return fields_dict;
 }
 
-arrangeByRow(arr);
+//get the products
 
+var getProducts = function(output_array) { 
+	var product_array = {};
+	var count = 1
+	product_array["product#" + count] = Array();
+	for (key in output_array) {
+		console.log(key);
+		console.log(output_array[key].length);
+		console.log("----------------------");
+		if (output_array[key].length === 5) {
+			//checking for serial no
+			console.log("length is 5");
+			console.log(output_array[key][0]);
+			if (checkForInt(output_array[key][0]) || true) {
+				console.log("it is a serial no");
 
+				if (checkForProductName(output_array[key][1])) {
+					console.log("It is a product name");
+				
+					if (checkForProdQuant(output_array[key][2])) {
+						var unitProdQuant = parseInt(output_array[key][2]);
+						console.log("It is a quanity");
+				
+						if (checkForPrices(output_array[key][3])) {
+							//var price = parseInt(output_array[key][3]);
+							var price = getValueFromPrice(output_array[key][3]);
+							console.log("It is a price");
+
+							if (checkForPrices(output_array[key][4])) {
+								var lineTotal = getValueFromPrice(output_array[key][4]);
+								console.log(lineTotal);
+								console.log(price);
+								console.log(unitProdQuant);
+								if (parseInt(lineTotal) === (price*unitProdQuant)) {
+									console.log("It is line total");
+									product_array["product#" + count] = Array(output_array[key][0], output_array[key][1], output_array[key][2], output_array[key][3], output_array[key][4]);
+									count = count + 1;
+								}
+							}
+						}
+
+					}
+				}
+			}
+
+		}
+
+	}
+	return product_array;
+}
+
+var products = getProducts(arrangeByRow(arr));
