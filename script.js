@@ -1,3 +1,7 @@
+function isInArray(value, array) {
+  return array.indexOf(value) > -1;
+}
+
 var checkForFloat = function(n) {
 	var numeric = parseInt(numeric);
 	return n === Number(n) && n % 1 !== 0;
@@ -198,6 +202,7 @@ var classifyFields = function(arr) {
 // 			fields_dict["category"].push("mobile no");
 // 		}
 // }
+
 var arrangeByRow = function(arr) {
 	var output_arr = [];
 	var row_no = parseInt(arr[0]['position']);
@@ -225,44 +230,45 @@ var arrangeByRow = function(arr) {
 	return fields_dict;
 }
 
+rows_checked = []
 //get the products
-
 var getProducts = function(output_array) { 
 	var product_array = {};
 	var count = 1
 	product_array["product#" + count] = Array();
 	for (key in output_array) {
-		console.log(key);
-		console.log(output_array[key].length);
-		console.log("----------------------");
+		//console.log(key);
+		//console.log(output_array[key].length);
+		//console.log("----------------------");
 		if (output_array[key].length === 5) {
 			//checking for serial no
-			console.log("length is 5");
-			console.log(output_array[key][0]);
+			//console.log("length is 5");
+			//console.log(output_array[key][0]);
 			if (checkForInt(output_array[key][0]) || true) {
-				console.log("it is a serial no");
+				//console.log("it is a serial no");
 
 				if (checkForProductName(output_array[key][1])) {
-					console.log("It is a product name");
+					//console.log("It is a product name");
 				
 					if (checkForProdQuant(output_array[key][2])) {
 						var unitProdQuant = parseInt(output_array[key][2]);
-						console.log("It is a quanity");
+						//console.log("It is a quanity");
 				
 						if (checkForPrices(output_array[key][3])) {
 							//var price = parseInt(output_array[key][3]);
 							var price = getValueFromPrice(output_array[key][3]);
-							console.log("It is a price");
+							//console.log("It is a price");
 
 							if (checkForPrices(output_array[key][4])) {
 								var lineTotal = getValueFromPrice(output_array[key][4]);
-								console.log(lineTotal);
-								console.log(price);
-								console.log(unitProdQuant);
+								//console.log(lineTotal);
+								//console.log(price);
+								//console.log(unitProdQuant);
 								if (parseInt(lineTotal) === (price*unitProdQuant)) {
-									console.log("It is line total");
-									product_array["product#" + count] = Array(output_array[key][0], output_array[key][1], output_array[key][2], output_array[key][3], output_array[key][4]);
-									count = count + 1;
+									//console.log("It is line total");
+									product_array["product#" + count++] = Array(output_array[key][0], output_array[key][1], output_array[key][2], output_array[key][3], output_array[key][4]);
+									rows_checked.push(key);
+									
 								}
 							}
 						}
@@ -277,4 +283,32 @@ var getProducts = function(output_array) {
 	return product_array;
 }
 
-var products = getProducts(arrangeByRow(arr));
+var getTheDate = function(row_data) {
+	//console.log(row_data);
+	date = [];
+	for (key in row_data) {
+		
+		if (!(isInArray(key, rows_checked))) {
+			//console.log(key);
+			//console.log(row_data[key]);
+
+			for (var i = 0; i<row_data[key].length; i++) {
+				if (checkForDate(row_data[key][i])) {
+					date.push(row_data[key][i]);
+				}
+			}
+		}
+	}
+	return date
+}
+
+
+//console.log("hi");
+var row_data = arrangeByRow(arr)
+var products = getProducts(row_data);
+var date = getTheDate(row_data);
+console.log(date);
+console.log(products);
+
+
+
