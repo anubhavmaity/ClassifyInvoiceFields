@@ -23,7 +23,7 @@ var checkForCustomerName = function(name) {
 
 var checkForAddress = function(address) {
 	var re = /^[a-zA-Z0-9\s,'-]*$/;
-	return re.test(address);
+	return re.test(address) && checkForPlaceInAddr(address);
 }
 
 var checkForProdQuant = function(prod_quant) {
@@ -97,14 +97,6 @@ var checkForPlaceInAddr = function(addr) {
 
 }
 
-
-//shift this to script.js
-// var arr = [{'field': 'External Brand elements as per the agreed designs and specifications', 'position': 'upper left'}, 
-// {'field':'External brand prints as per the agreed designs and specifications', 'position': 'upper right'}, 
-// {'field': 'Floor Directory as per the agreed designs and specifications', 'Design/ Agency  Charges', 'Packaging, Loading, Unloading, Installation Charges', 
-// '2', '3', '4', '5' , '2', '1', '2', '₹ 100.00', '₹ 200.00', '₹ 300.00', '₹ 200.00', '₹ 200.00', '₹ 600.00', '₹ 10.00', '₹ 20.00', '₹ 1,030.00', '₹ 23,540.00', '-₹ 2,817.50', 
-// '₹ 3.71', '₹ 28,000.00', '₹ 2,676.21', 'Apr 09, 2015', 'CABS/INV/15-16/MV/001', 'CABS/EST/14-15/MV/048', 'XXX/NO/PROJ/PO/2014-15/10/025', 'Mr Amod Jha', 'XXX YYT New Delhi']
-
 var arr = [{'data':'Mr Amod Jha, XXX, YYT, New Delhi', 'position': '3A'}, {'data':'Apr 09, 2015', 'position':'3E'}, 
 {'data': 'CABS/INV/15-16/MV/001', 'position':'4E'}, {'data': 'CABS/EST/14-15/MV/048', 'position': '5E'}, 
 {'data': 'XXX/NO/PROJ/PO/2014-15/10/025', 'position': '6E'}, {'data': 'Mr Amod Jha', 'position': '7E'}, {'data': '1', 'position':'14A'}, 
@@ -119,89 +111,6 @@ var arr = [{'data':'Mr Amod Jha, XXX, YYT, New Delhi', 'position': '3A'}, {'data
 {'data': '₹ 20.00', 'position':'18F'}, {'data': '₹ 1,030.00', 'position': '22F'}, {'data': '₹ 23,540.00', 'position': '23F'},
 {'data': '-₹ 2,817.50', 'position': '24F'}, {'data': '₹ 3.71', 'position': '25F'}, {'data': '₹ 28,000.00', 'position': '26F'},
 {'data': '₹ 2,676.21', 'position': '27F'}]
-
-/*
-var classifyFields = function(arr) {
-	var output_arr = [];
-	for (var i = 0; i< arr.length; i++) {
-
-		
-		var fields_dict = {};
-		fields_dict["field"] = arr[i];
-		fields_dict["category"] = []
-
-		if (checkForDate(arr[i])) {
-			//console.log(arr[i] + " is date");
-			
-			fields_dict["category"].push("date");
-		}
-		if (checkForAddress(arr[i]) && checkForPlaceInAddr(arr[i])) {
-			//console.log("hi");
-			//console.log(checkForAddress(arr[i]));
-			//console.log(checkForP,laceInAddr(arr[i]));
-			fields_dict["category"].push("address");
-		}
-		if (checkForCustomerName(arr[i])) {
-			//console.log(arr[i] + " is Customer Name");
-			fields_dict["category"].push("Customer name");
-		}
-		
-		if (checkForProdQuant(arr[i])) {
-
-			fields_dict["category"].push("product quantity");
-		}
-		if (checkForPrices(arr[i]) || checkForCurrencySymbol(arr[i])) {
-			//console.log(checkForCurrencySymbol(arr[i]));
-			//console.log(arr[i] + " is price");
-			fields_dict["category"].push("prices");
-		}
-		if (checkForProductName(arr[i])) {
-			//console.log(arr[i] + " product name");
-			fields_dict["category"].push("product name");
-		}
-		if (checkForMobileNo(arr[i])) {
-			fields_dict["category"].push("mobile no");
-		}
-		output_arr.push(fields_dict);
-	}
-	console.log(output_arr);
-}
-*/
-
-// var classifyFields = function(element) {
-// 	if (checkForDate(arr[i])) {
-// 			//console.log(arr[i] + " is date");
-			
-// 			fields_dict["category"].push("date");
-// 	}
-// 	else if (checkForAddress(arr[i]) && checkForPlaceInAddr(arr[i])) {
-// 			//console.log("hi");
-// 			//console.log(checkForAddress(arr[i]));
-// 			//console.log(checkForP,laceInAddr(arr[i]));
-// 			fields_dict["category"].push("address");
-// 	}
-// 	else if (checkForCustomerName(arr[i])) {
-// 			//console.log(arr[i] + " is Customer Name");
-// 			fields_dict["category"].push("Customer name");
-// 	}
-		
-// 		if (checkForProdQuant(arr[i])) {
-
-// 			fields_dict["category"].push("product quantity");
-// 		}
-// 		if (checkForPrices(arr[i]) || checkForCurrencySymbol(arr[i])) {
-// 			//console.log(checkForCurrencySymbol(arr[i]));
-// 			//console.log(arr[i] + " is price");
-// 			fields_dict["category"].push("prices");
-// 		}
-// 		if (checkForProductName(arr[i])) {
-// 			//console.log(arr[i] + " product name");
-// 			fields_dict["category"].push("product name");
-// 		}
-// 		if (checkForMobileNo(arr[i])) {
-// 			fields_dict["category"].push("mobile no");
-// 		}
-// }
 
 var arrangeByRow = function(arr) {
 	var output_arr = [];
@@ -283,9 +192,8 @@ var getProducts = function(output_array) {
 	return product_array;
 }
 
-var getTheDate = function(row_data) {
-	//console.log(row_data);
-	date = [];
+var getTheField = function(row_data, function_called) {
+	var field = [];
 	for (key in row_data) {
 		
 		if (!(isInArray(key, rows_checked))) {
@@ -293,20 +201,22 @@ var getTheDate = function(row_data) {
 			//console.log(row_data[key]);
 
 			for (var i = 0; i<row_data[key].length; i++) {
-				if (checkForDate(row_data[key][i])) {
-					date.push(row_data[key][i]);
+				if (function_called(row_data[key][i])) {
+					field.push(row_data[key][i]);
 				}
 			}
 		}
 	}
-	return date
+	return field
 }
 
-
-//console.log("hi");
 var row_data = arrangeByRow(arr)
 var products = getProducts(row_data);
-var date = getTheDate(row_data);
+var date = getTheField(row_data, checkForDate);
+var customer_name = getTheField(row_data, checkForCustomerName);
+var address = getTheField(row_data, checkForAddress);
+console.log(address);
+console.log(customer_name);
 console.log(date);
 console.log(products);
 
