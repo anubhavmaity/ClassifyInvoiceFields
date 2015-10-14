@@ -1,14 +1,16 @@
+var rows_checked = [];
+
 function isInArray(value, array) {
   return array.indexOf(value) > -1;
 }
 
 var checkForFloat = function(n) {
 	var numeric = parseInt(numeric);
-	return n === Number(n) && n % 1 !== 0;
+	return numeric === Number(numeric) && numeric % 1 !== 0;
 }
 var checkForInt = function(n) {
-	var numeric = parseInt(numeric);
-	return Number(n) === n && n % 1 === 0;
+	var numeric = parseInt(n);
+	return Number(numeric) === numeric && numeric % 1 === 0;
 }
 //checks for string of alphabets and numbers
 var checkForProductName = function(prod_name) {
@@ -50,6 +52,7 @@ var checkForInvoiceNo = function(invoice_no) {
 var getValueFromPrice = function(price) {
 	//remove the currency symbols if there any 
 	var rx = /\d+(?:\.\d+)?/;
+	price = price.replace(/\,/g,'');
   	var rx_arr = price.match(rx);
   	var value = parseInt(rx_arr[0]); 
   	return value
@@ -139,7 +142,7 @@ var arrangeByRow = function(arr) {
 	return fields_dict;
 }
 
-rows_checked = []
+
 //get the products
 var getProducts = function(output_array) { 
 	var product_array = {};
@@ -153,7 +156,7 @@ var getProducts = function(output_array) {
 			//checking for serial no
 			//console.log("length is 5");
 			//console.log(output_array[key][0]);
-			if (checkForInt(output_array[key][0]) || true) {
+			if (checkForInt(output_array[key][0])) {
 				//console.log("it is a serial no");
 
 				if (checkForProductName(output_array[key][1])) {
@@ -175,6 +178,7 @@ var getProducts = function(output_array) {
 								//console.log(unitProdQuant);
 								if (parseInt(lineTotal) === (price*unitProdQuant)) {
 									//console.log("It is line total");
+									//console.log("hi");
 									product_array["product#" + count++] = Array(output_array[key][0], output_array[key][1], output_array[key][2], output_array[key][3], output_array[key][4]);
 									rows_checked.push(key);
 									
@@ -188,8 +192,39 @@ var getProducts = function(output_array) {
 
 		}
 
+		if(output_array[key].length === 3) {
+			if (checkForInt(output_array[key][0])) {
+				if (checkForProductName(output_array[key][1])) {
+					if (checkForPrices(output_array[key][2])) {
+						//console.log("hi");
+						product_array["product#" + count++] = Array(output_array[key][0], output_array[key][1], output_array[key][2]);
+						rows_checked.push(key);
+					}
+				}
+			}
+		} 
+
 	}
 	return product_array;
+}
+
+var getsubTotalField = function(row_data, products) {
+	var max_element = Math.max.apply(Math, rows_checked);
+	var next_element = (parseInt(max_element) + 1).toString();
+	console.log(next_element);
+	var prod_attr_len;
+	var sum = 0;
+	for (key in products) {
+		prod_attr_len = products[key].length;
+		sum += getValueFromPrice(products[key][prod_attr_len-1]);
+	}
+	console.log(sum);
+
+	var subTotalField = getValueFromPrice(row_data[next_element][0]);
+	console.log(subTotalField);
+	if (subTotalField === sum) {
+		return subTotalField;
+	}
 }
 
 var getTheField = function(row_data, function_called) {
@@ -211,14 +246,18 @@ var getTheField = function(row_data, function_called) {
 }
 
 var row_data = arrangeByRow(arr)
-var products = getProducts(row_data);
+console.log(row_data);
+
 var date = getTheField(row_data, checkForDate);
 var customer_name = getTheField(row_data, checkForCustomerName);
 var address = getTheField(row_data, checkForAddress);
+var products = getProducts(row_data);
+console.log();
 console.log(address);
 console.log(customer_name);
 console.log(date);
 console.log(products);
+console.log(getsubTotalField(row_data, products));
 
 
 
